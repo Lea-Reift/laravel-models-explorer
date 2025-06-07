@@ -9,15 +9,51 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "workspaceContains:**/composer.json"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
+    "views": {
+      "explorer": [
+        {
+          "id": "laravelModels",
+          "name": "Laravel Models",
+          "when": "laravelProject",
+          "icon": "database"
+        }
+      ]
+    },
     "commands": [
       {
-        "command": "laravel-detector.checkLaravelProject",
-        "title": "Detectar si es un proyecto Laravel"
+        "command": "laravelModels.refresh",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "laravelModels.openModel",
+        "title": "Open Model"
+      },
+      {
+        "command": "laravelModels.createModel",
+        "title": "Create New Model",
+        "icon": "$(add)"
       }
-    ]
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "laravelModels.refresh",
+          "when": "view == laravelModels",
+          "group": "navigation"
+        },
+        {
+          "command": "laravelModels.createModel",
+          "when": "view == laravelModels",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
