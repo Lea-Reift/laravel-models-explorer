@@ -1,71 +1,205 @@
-# laravel-models-explorer README
+# Laravel Models Explorer
 
-This is the README for your extension "laravel-models-explorer". After writing up a brief description, we recommend including the following sections.
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://marketplace.visualstudio.com/items?itemName=laravel-models-explorer)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-## Features
+A powerful Visual Studio Code extension that provides an intuitive tree view to explore and manage all Laravel Eloquent models in your project. Navigate through your models, view their properties, relationships, and more with ease.
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+## ✨ Features
 
-For example if there is an image subfolder under your extension project workspace:
+- **🔍 Automatic Laravel Detection** - Automatically detects Laravel projects and activates the extension
+- **📁 Models Tree View** - Clean, organized sidebar showing all your Eloquent models
+- **🔗 Model Analysis** - Extracts and displays model properties:
+  - Fillable attributes
+  - Hidden attributes
+  - Cast definitions
+  - Eloquent relationships
+  - Used traits
+  - Database table names
+- **⚡ Quick Navigation** - Click any model to instantly open the file
+- **➕ Model Creation** - Create new models with boilerplate code directly from the extension
+- **🔄 Auto-refresh** - Automatically updates when model files are added, modified, or deleted
+- **💡 Rich Information** - Detailed tooltips and expandable nodes with model metadata
+- **🎨 Beautiful Icons** - Contextual icons for different model elements
 
-\!\[feature X\]\(images/feature-x.png\)
+## 🚀 Quick Start
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+1. **Install the extension** from the VS Code Marketplace
+2. **Open a Laravel project** in VS Code
+3. **Look for "Laravel Models"** in the Explorer sidebar
+4. **Click on any model** to open the file and start exploring!
 
-## Requirements
+## 📸 Screenshots
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+### Models Overview
 
-## Extension Settings
+![Models Tree View](images/models-tree-view.png)
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+### Model Details
 
-For example:
+![Model Information](images/model-details.png)
+![alt text](image.png)
+
+
+## 🛠️ Installation
+
+### From VS Code Marketplace
+
+1. Open VS Code
+2. Go to Extensions (`Ctrl+Shift+X` / `Cmd+Shift+X`)
+3. Search for "Laravel Models Explorer"
+4. Click **Install**
+
+### From Command Line
+
+```bash
+code --install-extension laravel-models-explorer
+```
+
+## 📋 Requirements
+
+- **VS Code** version 1.74.0 or higher
+- **Laravel project** with `composer.json`
+- **Models** in `app/Models/` or `app/` directory
+
+## 🎯 Usage
+
+### Exploring Models
+
+- The extension automatically scans your Laravel project for Eloquent models
+- Models appear in the "Laravel Models" tree view in the Explorer sidebar
+- Expand any model to see its detailed information
+
+### Model Information Display
+
+Each model shows:
+
+- **Fillable Fields** - Mass assignable attributes
+- **Hidden Fields** - Attributes hidden from arrays/JSON
+- **Casts** - Attribute casting definitions
+- **Relationships** - Eloquent relationships (hasOne, hasMany, belongsTo, etc.)
+- **Table Name** - Database table (auto-detected or custom)
+- **Traits** - Used traits like HasFactory
+
+### Creating New Models
+
+1. Click the **+** icon in the Laravel Models panel
+2. Enter the model name (e.g., "Post", "Category")
+3. The extension creates a new model file with Laravel boilerplate
+4. The file opens automatically for editing
+
+### Navigation
+
+- **Single click** on a model to open the file
+- **Expand/collapse** nodes to explore model details
+- Use the **refresh** button to manually update the tree
+
+## ⚙️ Extension Settings
 
 This extension contributes the following settings:
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+| Setting                         | Description                             | Default |
+| ------------------------------- | --------------------------------------- | ------- |
+| `laravelModels.autoRefresh`     | Automatically refresh when files change | `true`  |
+| `laravelModels.showProjectInfo` | Display Laravel version in tree         | `true`  |
+| `laravelModels.expandByDefault` | Expand model nodes by default           | `false` |
 
-## Known Issues
+## 🎨 Customization
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+### Icons and Themes
 
-## Release Notes
+The extension uses VS Code's built-in theme icons and adapts to your current theme automatically.
 
-Users appreciate release notes as you update your extension.
+### File Watching
 
-### 1.0.0
+The extension automatically watches for changes in:
 
-Initial release of ...
+- `app/Models/**/*.php`
 
-### 1.0.1
+## 📝 Commands
 
-Fixed issue #.
+| Command                        | Description                      | Keybinding |
+| ------------------------------ | -------------------------------- | ---------- |
+| `Laravel Models: Refresh`      | Manually refresh the models tree | -          |
+| `Laravel Models: Create Model` | Create a new Eloquent model      | -          |
+| `Laravel Models: Open Model`   | Open selected model file         | -          |
 
-### 1.1.0
+## 🔧 Supported Laravel Versions
 
-Added features X, Y, and Z.
+- ✅ Laravel 11.x
+- ✅ Laravel 10.x
+- ✅ Laravel 9.x
+- ✅ Laravel 8.x
+
+## 🐛 Known Issues
+
+- Models with complex inheritance might not be fully analyzed
+- Custom model paths outside `app/Models` directory are not automatically detected
+- Some dynamic relationships might not be recognized
+
+
+### Development Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/ivanmercedes/laravel-models-explorer.git
+
+# Install dependencies
+npm install
+
+# Open in VS Code
+code .
+
+# Press F5 to run the extension in a new Extension Development Host window
+```
+
+### Building
+
+```bash
+# Compile TypeScript
+npm run compile
+
+# Watch for changes
+npm run watch
+
+# Package extension
+vsce package
+```
+
+## 📄 License
+
+This extension is licensed under the [MIT License](LICENSE).
+
+## 🙏 Acknowledgments
+
+- Thanks to the Laravel community for inspiration
+- Built with ❤️ for Laravel developers
+- Icons provided by VS Code's Codicon library
+
+## 📞 Support
+
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/ivanmercedes/laravel-models-explorer/issues)
+- 💡 **Feature Requests**: [GitHub Discussions](https://github.com/ivanmercedes/laravel-models-explorer/discussions)
+
+
+## 📈 Changelog
+
+### [1.0.0] - 2025-06-07
+
+- 🎉 Initial release
+- ✨ Laravel project detection
+- 📁 Models tree view
+- 🔍 Model analysis and information display
+- ➕ Model creation functionality
+- 🔄 Auto-refresh capabilities
 
 ---
 
-## Following extension guidelines
+**Enjoy exploring your Laravel models!** 🚀
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+If you find this extension helpful, please consider:
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+- ⭐ **Rating it** on the VS Code Marketplace
+- 🐛 **Reporting issues** on GitHub
+- 💡 **Suggesting features** for future versions
+- 📢 **Sharing it** with other Laravel developers
