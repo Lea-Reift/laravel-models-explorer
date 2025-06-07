@@ -40,7 +40,6 @@ A powerful Visual Studio Code extension that provides an intuitive tree view to 
 
 ![Model Information](images/model-details.png)
 
-
 ## 🛠️ Installation
 
 ### From VS Code Marketplace
@@ -53,7 +52,7 @@ A powerful Visual Studio Code extension that provides an intuitive tree view to 
 ### From Command Line
 
 ```bash
-code --install-extension laravel-models-explorer
+code --install-extension IvanMercedes.laravel-models-explorer
 ```
 
 ## 📋 Requirements
@@ -137,7 +136,6 @@ The extension automatically watches for changes in:
 - Custom model paths outside `app/Models` directory are not automatically detected
 - Some dynamic relationships might not be recognized
 
-
 ### Development Setup
 
 ```bash
@@ -181,7 +179,6 @@ This extension is licensed under the [MIT License](LICENSE).
 - 🐛 **Bug Reports**: [GitHub Issues](https://github.com/ivanmercedes/laravel-models-explorer/issues)
 - 💡 **Feature Requests**: [GitHub Discussions](https://github.com/ivanmercedes/laravel-models-explorer/discussions)
 - ⭐ **Rate the Extension**: [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=IvanMercedes.laravel-models-explorer)
-
 
 ## 📈 Changelog
 
