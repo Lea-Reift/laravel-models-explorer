@@ -13,14 +13,16 @@
     "workspaceContains:**/composer.json"
   ],
   "main": "./dist/extension.js",
+  "icon": "./images/larave-models-explorer.png",
   "contributes": {
     "views": {
       "explorer": [
         {
           "id": "laravelModels",
+          "title": "Laravel Models Explorer",
           "name": "Laravel Models",
           "when": "laravelProject",
-          "icon": "database"
+          "icon": "./images/laravel-models-explorer-icon.svg"
         }
       ]
     },
