@@ -38,7 +38,6 @@ A powerful Visual Studio Code extension that provides an intuitive tree view to 
 ### Model Details
 
 ![Model Information](images/model-details.png)
-![alt text](image.png)
 
 
 ## 🛠️ Installation
