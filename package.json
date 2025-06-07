@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "laravel-models-explorer.helloWorld",
-        "title": "Hello World"
+        "command": "laravel-detector.checkLaravelProject",
+        "title": "Detectar si es un proyecto Laravel"
       }
     ]
   },
