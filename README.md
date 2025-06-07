@@ -2,6 +2,7 @@
 
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://marketplace.visualstudio.com/items?itemName=laravel-models-explorer)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Visual Studio Marketplace](https://img.shields.io/badge/VS%20Code-Marketplace-blue.svg)](https://marketplace.visualstudio.com/items?itemName=IvanMercedes.laravel-models-explorer)
 
 A powerful Visual Studio Code extension that provides an intuitive tree view to explore and manage all Laravel Eloquent models in your project. Navigate through your models, view their properties, relationships, and more with ease.
 
@@ -59,7 +60,7 @@ code --install-extension laravel-models-explorer
 
 - **VS Code** version 1.74.0 or higher
 - **Laravel project** with `composer.json`
-- **Models** in `app/Models/` or `app/` directory
+- **Models** in `app/Models/`
 
 ## 🎯 Usage
 
@@ -179,6 +180,7 @@ This extension is licensed under the [MIT License](LICENSE).
 
 - 🐛 **Bug Reports**: [GitHub Issues](https://github.com/ivanmercedes/laravel-models-explorer/issues)
 - 💡 **Feature Requests**: [GitHub Discussions](https://github.com/ivanmercedes/laravel-models-explorer/discussions)
+- ⭐ **Rate the Extension**: [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=IvanMercedes.laravel-models-explorer)
 
 
 ## 📈 Changelog

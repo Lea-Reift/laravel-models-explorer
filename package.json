@@ -3,13 +3,14 @@
   "displayName": "Laravel Models Explorer",
   "description": "Explore and browse through all the Laravel models in your project.",
   "version": "1.0.0",
+  "publisher": "IvanMercedes",
   "engines": {
     "vscode": "^1.100.0"
   },
   "categories": [
     "Other"
   ],
-   "repository": {
+  "repository": {
     "type": "git",
     "url": "https://github.com/ivanmercedes/laravel-models-explorer"
   },
