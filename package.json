@@ -2,13 +2,17 @@
   "name": "laravel-models-explorer",
   "displayName": "Laravel Models Explorer",
   "description": "Explore and browse through all the Laravel models in your project.",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.100.0"
   },
   "categories": [
     "Other"
   ],
+   "repository": {
+    "type": "git",
+    "url": "https://github.com/ivanmercedes/laravel-models-explorer"
+  },
   "activationEvents": [
     "workspaceContains:**/composer.json"
   ],
