@@ -2,7 +2,7 @@
   "name": "laravel-models-explorer",
   "displayName": "Laravel Models Explorer",
   "description": "Explore and browse through all the Laravel models in your project.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "IvanMercedes",
   "engines": {
     "vscode": "^1.100.0"
