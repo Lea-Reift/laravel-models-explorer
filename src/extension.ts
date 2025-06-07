@@ -34,13 +34,13 @@ export function activate(context: vscode.ExtensionContext) {
             
             const createModelCommand = vscode.commands.registerCommand('laravelModels.createModel', async () => {
                 const modelName = await vscode.window.showInputBox({
-                    prompt: 'Nombre del modelo (ej: User, Post, Category)',
+                    prompt: 'Model name (e.g., User, Post, Category)',
                     validateInput: (value) => {
                         if (!value || value.trim() === '') {
-                            return 'El nombre del modelo no puede estar vacío';
+                            return 'Model name cannot be empty';
                         }
                         if (!/^[A-Z][a-zA-Z0-9]*$/.test(value)) {
-                            return 'El nombre debe empezar con mayúscula y contener solo letras y números';
+                            return 'Name must start with an uppercase letter and contain only letters and numbers';
                         }
                         return null;
                     }
@@ -104,9 +104,9 @@ class ${modelName} extends Model
     try {
         await vscode.workspace.fs.writeFile(modelFile, Buffer.from(modelTemplate));
         await vscode.window.showTextDocument(modelFile);
-        vscode.window.showInformationMessage(`Modelo ${modelName} creado exitosamente`);
+        vscode.window.showInformationMessage(`Model ${modelName} created successfully`);
     } catch (error) {
-        vscode.window.showErrorMessage(`Error al crear el modelo: ${error}`);
+        vscode.window.showErrorMessage(`Error creating the model: ${error}`);
     }
 }
 
