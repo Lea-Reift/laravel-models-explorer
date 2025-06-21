@@ -95,13 +95,14 @@ Each model shows:
 
 ## ⚙️ Extension Settings
 
-This extension contributes the following settings:
+This extension contributes the following settings (accessible via `File > Preferences > Settings`, then search for "Laravel Models Explorer"):
 
-| Setting                         | Description                             | Default |
-| ------------------------------- | --------------------------------------- | ------- |
-| `laravelModels.autoRefresh`     | Automatically refresh when files change | `true`  |
-| `laravelModels.showProjectInfo` | Display Laravel version in tree         | `true`  |
-| `laravelModels.expandByDefault` | Expand model nodes by default           | `false` |
+| Setting                                   | Description                                                                                     | Default |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------- | ------- |
+| `laravelModelsExplorer.autoRefresh`       | Automatically refreshes the view when model files change.                                       | `true`  |
+| `laravelModelsExplorer.showProjectInfo`   | Shows detailed project information including Laravel version and model statistics at the top.   | `true`  |
+| `laravelModelsExplorer.expandByDefault`   | Automatically expands all model nodes (and their properties) in the tree when the view is loaded. | `false` |
+| `laravelModelsExplorer.enableTooltips`    | Enables informative tooltips with additional details for each model and its properties.         | `true`  |
 
 ## 🎨 Customization
 
@@ -182,6 +183,14 @@ This extension is licensed under the [MIT License](LICENSE).
 
 ## 📈 Changelog
 
+### [1.0.1] - (Current/Upcoming)
+- **Added `showProjectInfo` setting**: Display project-level information like Laravel version and total model count at the top of the explorer view.
+- **Added `expandByDefault` setting**: Option to have all models and their properties automatically expanded when the view loads.
+- **Added `enableTooltips` setting**: Control the display of detailed tooltips for models and their attributes.
+- **Improved `autoRefresh`**: Now configurable via settings.
+- Enhanced tooltip content with more details and Markdown formatting.
+- Minor bug fixes and performance improvements.
+
 ### [1.0.0] - 2025-06-07
 
 - 🎉 Initial release
@@ -189,7 +198,7 @@ This extension is licensed under the [MIT License](LICENSE).
 - 📁 Models tree view
 - 🔍 Model analysis and information display
 - ➕ Model creation functionality
-- 🔄 Auto-refresh capabilities
+- 🔄 Basic auto-refresh capabilities
 
 ---
 
