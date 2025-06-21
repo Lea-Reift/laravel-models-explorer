@@ -23,8 +23,8 @@ export function activate(context: vscode.ExtensionContext) {
             });
             
             // Registrar comandos
-            const refreshCommand = vscode.commands.registerCommand('laravelModels.refresh', () => {
-                modelsProvider.refresh();
+            const refreshCommand = vscode.commands.registerCommand('laravelModels.refresh', async () => {
+                await modelsProvider.refresh();
             });
             
             const openModelCommand = vscode.commands.registerCommand('laravelModels.openModel', (model: ModelItem) => {
@@ -49,15 +49,44 @@ export function activate(context: vscode.ExtensionContext) {
                 
                 if (modelName) {
                     await createNewModel(modelName);
-                    modelsProvider.refresh();
+                    await modelsProvider.refresh();
                 }
             });
             
             // Auto-refresh cuando se modifican archivos
             const watcher = vscode.workspace.createFileSystemWatcher('**/app/Models/**/*.php');
-            watcher.onDidCreate(() => modelsProvider.refresh());
-            watcher.onDidDelete(() => modelsProvider.refresh());
-            watcher.onDidChange(() => modelsProvider.refresh());
+            const autoRefreshHandler = async () => {
+                const config = vscode.workspace.getConfiguration('laravelModelsExplorer');
+                if (config.get('autoRefresh', true)) {
+                    await modelsProvider.refresh();
+                }
+            };
+            watcher.onDidCreate(autoRefreshHandler);
+            watcher.onDidDelete(autoRefreshHandler);
+            watcher.onDidChange(autoRefreshHandler);
+            
+            // Actualizar cuando cambia la configuración
+            vscode.workspace.onDidChangeConfiguration(async e => {
+                let needsRefresh = false;
+                const config = vscode.workspace.getConfiguration('laravelModelsExplorer');
+
+                if (e.affectsConfiguration('laravelModelsExplorer.autoRefresh') && config.get('autoRefresh', true)) {
+                    needsRefresh = true;
+                }
+                if (e.affectsConfiguration('laravelModelsExplorer.showProjectInfo')) {
+                    needsRefresh = true;
+                }
+                if (e.affectsConfiguration('laravelModelsExplorer.expandByDefault')) {
+                    needsRefresh = true;
+                }
+                if (e.affectsConfiguration('laravelModelsExplorer.enableTooltips')) {
+                    needsRefresh = true;
+                }
+
+                if (needsRefresh) {
+                    await modelsProvider.refresh();
+                }
+            });
             
             context.subscriptions.push(
                 treeView,
