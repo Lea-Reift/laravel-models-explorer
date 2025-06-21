@@ -2,7 +2,7 @@
   "name": "laravel-models-explorer",
   "displayName": "Laravel Models Explorer",
   "description": "Explore and browse through all the Laravel models in your project.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "publisher": "IvanMercedes",
   "engines": {
     "vscode": "^1.100.0"
@@ -20,6 +20,31 @@
   "main": "./dist/extension.js",
   "icon": "./images/larave-models-explorer.png",
   "contributes": {
+    "configuration": {
+      "title": "Laravel Models Explorer",
+      "properties": {
+        "laravelModelsExplorer.autoRefresh": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically refreshes the view when model files change."
+        },
+        "laravelModelsExplorer.showProjectInfo": {
+          "type": "boolean",
+          "default": true,
+          "description": "Shows detailed project information including Laravel version and model statistics."
+        },
+        "laravelModelsExplorer.expandByDefault": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically expands all model nodes in the tree when the view is loaded."
+        },
+        "laravelModelsExplorer.enableTooltips": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enables informative tooltips with additional details for each model."
+        }
+      }
+    },
     "views": {
       "explorer": [
         {
