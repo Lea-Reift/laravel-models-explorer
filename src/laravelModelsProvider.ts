@@ -1,15 +1,31 @@
 import * as vscode from 'vscode';
-import { ModelAnalyzer } from './modelAnalyzer';
+import { CommandModelInfo, PHPCommand } from './commands/phpCommand';
+import { isCommandError } from './commands/baseCommand';
+
+export interface ModelInfo {
+    name: string;
+    namespace: string;
+    table: string;
+    fillable: string[];
+    hidden: string[];
+    casts: { [key: string]: string };
+    relationships: RelationshipInfo[];
+    traits: string[];
+}
+
+export interface RelationshipInfo {
+    name: string;
+    type: string;
+    relatedModel?: string;
+}
 
 export class LaravelModelsProvider implements vscode.TreeDataProvider<ModelItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<ModelItem | undefined | null | void> = new vscode.EventEmitter<ModelItem | undefined | null | void>();
     readonly onDidChangeTreeData: vscode.Event<ModelItem | undefined | null | void> = this._onDidChangeTreeData.event;
 
     private models: ModelItem[] = [];
-    private analyzer: ModelAnalyzer;
 
     constructor() {
-        this.analyzer = new ModelAnalyzer();
         this.refresh();
     }
 
@@ -37,38 +53,41 @@ export class LaravelModelsProvider implements vscode.TreeDataProvider<ModelItem>
         }
 
         try {
-            const modelsPattern = new vscode.RelativePattern(workspaceFolder, 'app/Models/**/*.php');
-            const files = await vscode.workspace.findFiles(modelsPattern);
+            const models = await PHPCommand.getModels(workspaceFolder.uri.fsPath);
 
-            this.models = [];
+            models.forEach((model: CommandModelInfo) => {
+                const { uri, ...modelInfo }: CommandModelInfo = model;
+                const file = vscode.Uri.file(uri);
 
-            for (const file of files) {
-                const modelInfo = await this.analyzer.analyzeModel(file);
-                if (modelInfo) {
-                    const modelItem = new ModelItem(
-                        modelInfo.name,
-                        vscode.TreeItemCollapsibleState.Collapsed,
-                        file
-                    );
+                const modelItem = new ModelItem(
+                    modelInfo.name,
+                    vscode.TreeItemCollapsibleState.Collapsed,
+                    file
+                );
 
-                    // Agregar información como hijos
-                    modelItem.children = this.createModelInfoNodes(modelInfo);
-                    modelItem.tooltip = this.createTooltip(modelInfo);
+                // load information as nodes
+                modelItem.children = this.createModelInfoNodes(modelInfo);
+                modelItem.tooltip = this.createTooltip(modelInfo);
 
-                    this.models.push(modelItem);
-                }
-            }
+                this.models.push(modelItem);
+            });
 
-            // Ordenar modelos alfabéticamente
             this.models.sort((a, b) => a.label!.toString().localeCompare(b.label!.toString()));
 
         } catch (error) {
             console.error('Error loading models:', error);
+
+            if (isCommandError(error)) {
+                if ('status' in error) {
+                    console.log('output' + error.output.toString());
+                }
+            }
+
             this.models = [];
         }
     }
 
-    private createModelInfoNodes(modelInfo: any): ModelItem[] {
+    private createModelInfoNodes(modelInfo: ModelInfo): ModelItem[] {
         const children: ModelItem[] = [];
 
         // Propiedades fillable
