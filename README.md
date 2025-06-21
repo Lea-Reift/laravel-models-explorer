@@ -183,7 +183,7 @@ This extension is licensed under the [MIT License](LICENSE).
 
 ## 📈 Changelog
 
-### [1.0.1] - (Current/Upcoming)
+### [1.0.2] - 2025-06-21
 - **Added `showProjectInfo` setting**: Display project-level information like Laravel version and total model count at the top of the explorer view.
 - **Added `expandByDefault` setting**: Option to have all models and their properties automatically expanded when the view loads.
 - **Added `enableTooltips` setting**: Control the display of detailed tooltips for models and their attributes.
