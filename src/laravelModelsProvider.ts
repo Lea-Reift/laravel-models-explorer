@@ -14,10 +14,10 @@ export class LaravelModelsProvider implements vscode.TreeDataProvider<ModelItem>
         this.refresh();
     }
 
-    refresh(): void {
-        this.loadItems();
+    async refresh(): Promise<void> {
+        this.items = [];
+        await this.loadItems();
         this._onDidChangeTreeData.fire();
-        console.log('refresh papu');
     }
 
     getTreeItem(element: ModelItem): vscode.TreeItem {
@@ -76,7 +76,6 @@ export class LaravelModelsProvider implements vscode.TreeDataProvider<ModelItem>
 
             // Ordenar modelos alfabéticamente
             modelItems.sort((a, b) => a.originalLabel.localeCompare(b.originalLabel));
-            console.log('tenemo to:', modelItems);
             this.items.push(...modelItems);
 
         } catch (error) {
