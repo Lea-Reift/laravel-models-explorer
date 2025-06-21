@@ -79,7 +79,7 @@ export class LaravelModelsProvider implements vscode.TreeDataProvider<ModelItem>
 
             if (isCommandError(error)) {
                 if ('status' in error) {
-                    console.log('output' + error.output.toString());
+                    console.log(error.output.toString());
                 }
             }
 
