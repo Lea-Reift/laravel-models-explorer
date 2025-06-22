@@ -77,7 +77,7 @@ function parseModelInfo(string $modelClass): array
         'table' => $model->getTable(),
         'fillable' => $model->getFillable(),
         'hidden' => $model->getHidden(),
-        'casts' => (object)[],
+        'casts' => $model->getCasts(),
         'relationships' => parseModelRelations($model),
         'traits' => $reflection->getTraitNames(),
         'uri' => $reflection->getFileName(),
