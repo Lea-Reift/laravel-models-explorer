@@ -47,6 +47,26 @@ export class LaravelModelsProvider implements vscode.TreeDataProvider<ModelItem>
         return Promise.resolve(element.children || []);
     }
 
+    private async setProjectInfo(workspaceFolder: vscode.WorkspaceFolder): Promise<void> {
+        const config = vscode.workspace.getConfiguration('laravelModelsExplorer');
+
+        vscode.window.showInformationMessage("called", { modal: true });
+        // Add Project Info to items
+        if (!config.get('showProjectInfo', true)) {
+            return;
+        }
+
+        vscode.window.showInformationMessage("called 2", { modal: true });
+
+        const projectInfo = await this.getProjectInfo(workspaceFolder);
+
+        if (!projectInfo) {
+            return;
+        }
+
+        this.items.unshift(projectInfo);
+    }
+
     private async loadItems() {
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
         if (!workspaceFolder) {
@@ -55,21 +75,12 @@ export class LaravelModelsProvider implements vscode.TreeDataProvider<ModelItem>
         }
 
         this.items = [];
-        const config = vscode.workspace.getConfiguration('laravelModelsExplorer');
-
-        // Add Project Info
-        if (config.get('showProjectInfo', true)) {
-            const projectInfo = await this.getProjectInfo(workspaceFolder);
-            if (projectInfo) {
-                this.items.push(projectInfo);
-            }
-        }
 
         // Load Models
         try {
             const models = await PHPCommand.getModels(workspaceFolder.uri.fsPath);
 
-            models.forEach((model: CommandModelInfo) => {
+            const modelItems: ModelItem[] = models.map((model: CommandModelInfo): ModelItem => {
                 const { uri, ...modelInfo }: CommandModelInfo = model;
                 const file = vscode.Uri.file(uri);
 
@@ -83,22 +94,21 @@ export class LaravelModelsProvider implements vscode.TreeDataProvider<ModelItem>
                 modelItem.children = this.createModelInfoNodes(modelInfo);
                 modelItem.tooltip = this.createTooltip(modelInfo);
 
-                this.items.push(modelItem);
+                return modelItem;
             });
 
-            this.items.sort((a, b) => a.label!.toString().localeCompare(b.label!.toString()));
+            this.items.push(...modelItems);
 
         } catch (error) {
             console.error('Error loading models:', error);
-
             if (isCommandError(error)) {
                 if ('status' in error) {
                     console.log(error.output.toString());
                 }
             }
-
-            this.items = [];
         }
+
+        await this.setProjectInfo(workspaceFolder);
     }
 
     private async getProjectInfo(workspaceFolder: vscode.WorkspaceFolder): Promise<ModelItem | null> {
@@ -132,6 +142,7 @@ export class LaravelModelsProvider implements vscode.TreeDataProvider<ModelItem>
                 undefined,
                 'projectInfo'
             );
+
             projectInfoNode.tooltip = this.createTooltip({}, 'projectInfo'); // Set tooltip for project info
             projectInfoNode.iconPath = new vscode.ThemeIcon('info');
 
