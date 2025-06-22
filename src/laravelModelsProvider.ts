@@ -50,13 +50,10 @@ export class LaravelModelsProvider implements vscode.TreeDataProvider<ModelItem>
     private async setProjectInfo(workspaceFolder: vscode.WorkspaceFolder): Promise<void> {
         const config = vscode.workspace.getConfiguration('laravelModelsExplorer');
 
-        vscode.window.showInformationMessage("called", { modal: true });
         // Add Project Info to items
         if (!config.get('showProjectInfo', true)) {
             return;
         }
-
-        vscode.window.showInformationMessage("called 2", { modal: true });
 
         const projectInfo = await this.getProjectInfo(workspaceFolder);
 
@@ -128,9 +125,9 @@ export class LaravelModelsProvider implements vscode.TreeDataProvider<ModelItem>
 
             // Contar modelos
             try {
-                const modelsPattern = new vscode.RelativePattern(workspaceFolder, 'app/Models/**/*.php');
-                const modelFiles = await vscode.workspace.findFiles(modelsPattern);
-                modelCount = modelFiles.length;
+                const models = await PHPCommand.getModels(workspaceFolder.uri.fsPath);
+                modelCount = models.length;
+
             } catch (e) {
                 console.warn("Could not count model files.");
             }
