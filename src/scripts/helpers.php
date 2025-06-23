@@ -8,6 +8,12 @@ function json_output(mixed $data): never
     exit(0);
 }
 
+function error_output(string $message, int $code = 1): never
+{
+    fwrite(STDERR, $message . PHP_EOL);
+    exit($code);
+}
+
 if (! function_exists('array_find')) {
     function array_find(array $array, callable $callback, string $use = 'BOTH'): mixed
     {
@@ -39,53 +45,52 @@ if (! function_exists('array_find')) {
     }
 }
 
-function array_group_by(array $array, string|callable $groupBy)
+function class_extends_model(string $classFilePath, ?string $class = null): bool
 {
-    $result = [];
-
-    foreach ($array as $key => $value) {
-        $groupByKey = is_callable($groupBy) ? $groupBy($value, $key) : $groupBy;
-        $result[$groupByKey][] = $value;
-    }
-
-    return $result;
-}
-
-function class_extends_model(string $file, string $expectedClass): bool
-{
-    if (! is_file($file)) {
+    if (! is_file($classFilePath)) {
         return false;
     }
-    $code = file_get_contents($file);
+
+    $class ??= get_fully_qualified_class_name($classFilePath);
+
+    if (!class_exists($class)) {
+        require_once $classFilePath;
+    }
+
+    return is_subclass_of($class, Model::class);
+}
+
+function get_default_php_token(string|int|null|PhpToken $token, array $tokensArray = []): PhpToken
+{
+    $defaultToken = new PhpToken(T_WHITESPACE, " ");
+
+    return match (true) {
+        is_a($token, PhpToken::class) => $token,
+        is_string($token) || is_int($token) => $tokensArray[$token] ?? $defaultToken,
+        default => $defaultToken
+    };
+}
+
+function get_fully_qualified_class_name(string $classFilePath): ?string
+{
+    if (! is_file($classFilePath)) {
+        return false;
+    }
+
+    $code = file_get_contents($classFilePath);
+
     if ($code === false) {
         return false;
     }
 
     $tokens = PhpToken::tokenize($code);
+    $namespace = array_find($tokens, use: 'KEY', callback: fn(int $key) => get_default_php_token($key - 2, $tokens)->is(T_NAMESPACE))?->text;
+    $currentClass = array_find($tokens, use: 'KEY', callback: fn(int $key) => get_default_php_token($key - 2, $tokens)->is(T_CLASS))?->text;
 
-    $namespace = array_find($tokens, use: 'KEY', callback: fn (int $key) => ($tokens[$key - 2] ?? null)?->is(T_NAMESPACE))?->text;
-    $currentClass = array_find($tokens, use: 'KEY', callback: fn (int $key) => ($tokens[$key - 2] ?? null)?->is(T_CLASS))?->text;
-    $extends = array_find($tokens, use: 'KEY', callback: fn (int $key) => ($tokens[$key - 2] ?? null)?->is(T_EXTENDS))?->text;
-
-    $fqcn = $namespace ? "$namespace\\$currentClass" : $currentClass;
-
-    if ($fqcn !== $expectedClass) {
-        return false;
-    }
-
-    $baseModel = Model::class;
-
-    $tokensByLine = array_group_by($tokens, fn (PhpToken $token) => $token->line);
-    $importsLines = array_filter($tokensByLine, fn (array $tokens) => $tokens[0]->is(T_USE));
-
-    $imports = array_map(fn (array $tokens) => $tokens[2]->text, $importsLines);
-
-    return (in_array($baseModel, $imports) && $extends === 'Model') || $extends === $baseModel;
-
-    return false;
+    return $namespace ? "$namespace\\$currentClass" : $currentClass;
 }
 
-function parseModelRelations(Model $model): array
+function parse_model_relations(Model $model): array
 {
     $reflection = new ReflectionClass($model);
 
@@ -133,7 +138,7 @@ function parseModelRelations(Model $model): array
     return $relations;
 }
 
-function parseModelInfo(string $modelClass): array
+function parse_model_info(string $modelClass): array
 {
     $model = new $modelClass();
 
@@ -146,8 +151,17 @@ function parseModelInfo(string $modelClass): array
         'fillable' => $model->getFillable(),
         'hidden' => $model->getHidden(),
         'casts' => $model->getCasts(),
-        'relationships' => parseModelRelations($model),
+        'relationships' => parse_model_relations($model),
         'traits' => $reflection->getTraitNames(),
         'uri' => $reflection->getFileName(),
     ];
+}
+
+function find_php_files($dir)
+{
+    $directory = new RecursiveDirectoryIterator($dir);
+    $flattened = new RecursiveIteratorIterator($directory);
+    $files = iterator_to_array(new RegexIterator($flattened, '/^.+\.php$/i'));
+
+    return array_keys($files);
 }
