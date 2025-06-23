@@ -1,4 +1,4 @@
-import { BaseCommand, Command, defaultOptions } from "./baseCommand";
+import { BaseCommand, Command, defaultOptions, CommandError } from "./baseCommand";
 import { get_models } from "virtual:php-scripts";
 import path from "path";
 import { ModelInfo } from "../laravelModelsProvider";
@@ -38,6 +38,10 @@ export class PHPCommand extends BaseCommand {
             ]
         };
 
-        return this.execCommand(command, { ...defaultOptions, outputAsJSEntity: true });
+        return this.execCommand(command, { ...defaultOptions, outputAsJSEntity: true })
+            .catch((error: CommandError) => {
+                const message: string = 'status' in error ? error.output.toString() : error.message;
+                window.showErrorMessage(`Error loading models: ${message}`);
+            });
     }
 }
