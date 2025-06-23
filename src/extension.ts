@@ -111,12 +111,8 @@ export async function activate(context: vscode.ExtensionContext) {
                 await modelsProvider.refresh();
             };
 
-            const autoRefreshHandlerWithAutoload = async () => {
-                await modelsProvider.refresh();
-            };
-
-            watcher.onDidCreate(autoRefreshHandlerWithAutoload);
-            watcher.onDidDelete(autoRefreshHandlerWithAutoload);
+            watcher.onDidCreate(autoRefreshHandler);
+            watcher.onDidDelete(autoRefreshHandler);
             watcher.onDidChange(autoRefreshHandler);
 
             context.subscriptions.push(watcher);
