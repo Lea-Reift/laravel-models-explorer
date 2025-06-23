@@ -3,6 +3,7 @@ import { LaravelModelsProvider, ModelItem } from './laravelModelsProvider';
 import { LaravelProjectDetector } from './laravelProjectDetector';
 import ModelTemplate from './templates/model';
 
+
 let modelsProvider: LaravelModelsProvider;
 
 type ComposerJson = {
@@ -38,7 +39,7 @@ function json_parser(json: string): any {
 export async function activate(context: vscode.ExtensionContext) {
     // Detectar si es un proyecto Laravel
     const isLaravel = LaravelProjectDetector.isLaravelProject();
-    
+
     if (!isLaravel) {
         return;
     }
@@ -101,13 +102,20 @@ export async function activate(context: vscode.ExtensionContext) {
 
         const { autoload: { "psr-4": namespaces } }: ComposerJson = json_parser(composerContent) as ComposerJson;
 
+        Object.entries(namespaces).forEach(async ([, namespacePath]: [string, string]) => {
+            const watcher = vscode.workspace.createFileSystemWatcher(`${workspaceFolder.uri.fsPath}/${namespacePath}**/*.php`);
+            const processedUris = new Set<string>();
 
-        Object.entries(namespaces).forEach(async ([namespace, path]: [string, string]) => {
-            const absolutePath = `${workspaceFolder.uri.fsPath}/${path}**/*.php`;
+            const autoRefreshHandler = async (uri: vscode.Uri) => {
+                const filePath = uri.fsPath;
 
-            const watcher = vscode.workspace.createFileSystemWatcher(absolutePath);
+                if (processedUris.has(filePath)) {
+                    return;
+                }
 
-            const autoRefreshHandler = async () => {
+                processedUris.add(filePath);
+                setTimeout(() => processedUris.delete(filePath), 500);
+
                 await modelsProvider.refresh();
             };
 
