@@ -31,9 +31,12 @@ export class LaravelModelsProvider implements vscode.TreeDataProvider<ModelItem>
     }
 
     async refresh(): Promise<void> {
-        this.items = [];
-        await this.loadItems();
-        this._onDidChangeTreeData.fire();
+        vscode.window.withProgress(
+            { title: "Loading models...", location: vscode.ProgressLocation.Notification },
+            async () => {
+                await this.loadItems();
+                this._onDidChangeTreeData.fire();
+            });
     }
 
     getTreeItem(element: ModelItem): vscode.TreeItem {
@@ -71,39 +74,41 @@ export class LaravelModelsProvider implements vscode.TreeDataProvider<ModelItem>
             return;
         }
 
-        await this.setProjectInfo(workspaceFolder);
-
         // Load Models
+        let models: CommandModelInfo[];
         try {
-            const models = await PHPCommand.getModels(workspaceFolder.uri.fsPath);
-
-            const modelItems: ModelItem[] = models.map((model: CommandModelInfo): ModelItem => {
-                const { uri, ...modelInfo }: CommandModelInfo = model;
-                const file = vscode.Uri.file(uri);
-
-                const modelItem = new ModelItem(
-                    modelInfo.name,
-                    vscode.TreeItemCollapsibleState.Collapsed,
-                    file
-                );
-
-                // load information as nodes
-                modelItem.children = this.createModelInfoNodes(modelInfo);
-                modelItem.tooltip = this.createTooltip(modelInfo);
-
-                return modelItem;
-            });
-
-            this.items.push(...modelItems);
-
+            models = await PHPCommand.getModels(workspaceFolder.uri.fsPath);
         } catch (error) {
             console.error('Error loading models:', error);
-            if (isCommandError(error)) {
-                if ('status' in error) {
-                    console.log(error.output.toString());
-                }
+
+            if (!isCommandError(error)) {
+                return;
             }
+            console.log('status' in error ? error.output.toString() : error.message);
+            return;
         }
+
+        this.items = [];
+        await this.setProjectInfo(workspaceFolder);
+
+        const modelItems: ModelItem[] = models.map((model: CommandModelInfo): ModelItem => {
+            const { uri, ...modelInfo }: CommandModelInfo = model;
+            const file = vscode.Uri.file(uri);
+
+            const modelItem = new ModelItem(
+                modelInfo.name,
+                vscode.TreeItemCollapsibleState.Collapsed,
+                file
+            );
+
+            // load information as nodes
+            modelItem.children = this.createModelInfoNodes(modelInfo);
+            modelItem.tooltip = this.createTooltip(modelInfo);
+
+            return modelItem;
+        });
+
+        this.items.push(...modelItems);
     }
 
     private async getProjectInfo(workspaceFolder: vscode.WorkspaceFolder): Promise<ModelItem | null> {
@@ -127,7 +132,7 @@ export class LaravelModelsProvider implements vscode.TreeDataProvider<ModelItem>
                 modelCount = models.length;
 
             } catch (e) {
-                console.warn("Could not count model files.");
+                console.warn("Could not count model files.", e);
             }
 
 
