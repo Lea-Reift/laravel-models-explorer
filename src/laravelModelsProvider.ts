@@ -71,7 +71,7 @@ export class LaravelModelsProvider implements vscode.TreeDataProvider<ModelItem>
             return;
         }
 
-        this.items = [];
+        await this.setProjectInfo(workspaceFolder);
 
         // Load Models
         try {
@@ -104,8 +104,6 @@ export class LaravelModelsProvider implements vscode.TreeDataProvider<ModelItem>
                 }
             }
         }
-
-        await this.setProjectInfo(workspaceFolder);
     }
 
     private async getProjectInfo(workspaceFolder: vscode.WorkspaceFolder): Promise<ModelItem | null> {
