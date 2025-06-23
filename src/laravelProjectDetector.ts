@@ -1,7 +1,10 @@
 import * as vscode from 'vscode';
 
 export class LaravelProjectDetector {
-    async isLaravelProject(): Promise<boolean> {
+    static async isLaravelProject(): Promise<boolean> {
+
+        const detector: LaravelProjectDetector = new this;
+
         const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
         if (!workspaceFolder) {
             return false;
@@ -10,7 +13,7 @@ export class LaravelProjectDetector {
         try {
             // Verificar composer.json
             const composerJsonUri = vscode.Uri.joinPath(workspaceFolder.uri, 'composer.json');
-            const composerExists = await this.fileExists(composerJsonUri);
+            const composerExists = await detector.fileExists(composerJsonUri);
 
             if (!composerExists) {
                 return false;
@@ -57,7 +60,7 @@ export class LaravelProjectDetector {
             let directoriesFound = 0;
             for (const dir of laravelDirectories) {
                 const dirUri = vscode.Uri.joinPath(workspaceFolder.uri, dir);
-                if (await this.directoryExists(dirUri)) {
+                if (await detector.directoryExists(dirUri)) {
                     directoriesFound++;
                 }
             }
@@ -76,7 +79,7 @@ export class LaravelProjectDetector {
 
             for (const file of laravelFiles) {
                 const fileUri = vscode.Uri.joinPath(workspaceFolder.uri, file);
-                if (await this.fileExists(fileUri)) {
+                if (await detector.fileExists(fileUri)) {
                     return true;
                 }
             }

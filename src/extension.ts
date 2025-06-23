@@ -35,126 +35,124 @@ function json_parser(json: string): any {
     }
 };
 
-export function activate(context: vscode.ExtensionContext) {
-    const detector = new LaravelProjectDetector();
-
+export async function activate(context: vscode.ExtensionContext) {
     // Detectar si es un proyecto Laravel
-    detector.isLaravelProject().then(async isLaravel => {
-        if (!isLaravel) {
-            return;
+    const isLaravel = LaravelProjectDetector.isLaravelProject();
+    
+    if (!isLaravel) {
+        return;
+    }
+
+    vscode.commands.executeCommand('setContext', 'laravelProject', true);
+
+    // Inicializar el proveedor de modelos
+    modelsProvider = new LaravelModelsProvider();
+
+    // Registrar el tree view
+    const treeView = vscode.window.createTreeView('laravelModels', {
+        treeDataProvider: modelsProvider,
+        showCollapseAll: true
+    });
+
+    // Registrar comandos
+    const refreshCommand = vscode.commands.registerCommand('laravelModels.refresh', async () => {
+        await modelsProvider.refresh();
+    });
+
+    const openModelCommand = vscode.commands.registerCommand('laravelModels.openModel', (model: ModelItem) => {
+        if (model.resourceUri) {
+            vscode.window.showTextDocument(model.resourceUri);
         }
+    });
 
-        vscode.commands.executeCommand('setContext', 'laravelProject', true);
-
-        // Inicializar el proveedor de modelos
-        modelsProvider = new LaravelModelsProvider();
-
-        // Registrar el tree view
-        const treeView = vscode.window.createTreeView('laravelModels', {
-            treeDataProvider: modelsProvider,
-            showCollapseAll: true
-        });
-
-        // Registrar comandos
-        const refreshCommand = vscode.commands.registerCommand('laravelModels.refresh', async () => {
-            await modelsProvider.refresh();
-        });
-
-        const openModelCommand = vscode.commands.registerCommand('laravelModels.openModel', (model: ModelItem) => {
-            if (model.resourceUri) {
-                vscode.window.showTextDocument(model.resourceUri);
-            }
-        });
-
-        const createModelCommand = vscode.commands.registerCommand('laravelModels.createModel', async () => {
-            const modelName = await vscode.window.showInputBox({
-                prompt: 'Model name (e.g., User, Post, Category)',
-                validateInput: (value) => {
-                    if (!value || value.trim() === '') {
-                        return 'Model name cannot be empty';
-                    }
-                    if (!/^[A-Z][a-zA-Z0-9]*$/.test(value)) {
-                        return 'Name must start with an uppercase letter and contain only letters and numbers';
-                    }
-                    return null;
+    const createModelCommand = vscode.commands.registerCommand('laravelModels.createModel', async () => {
+        const modelName = await vscode.window.showInputBox({
+            prompt: 'Model name (e.g., User, Post, Category)',
+            validateInput: (value) => {
+                if (!value || value.trim() === '') {
+                    return 'Model name cannot be empty';
                 }
-            });
-
-            if (modelName) {
-                await createNewModel(modelName);
+                if (!/^[A-Z][a-zA-Z0-9]*$/.test(value)) {
+                    return 'Name must start with an uppercase letter and contain only letters and numbers';
+                }
+                return null;
             }
         });
 
-        const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
-
-        if (!workspaceFolder) {
-            return;
+        if (modelName) {
+            await createNewModel(modelName);
         }
+    });
 
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+
+    if (!workspaceFolder) {
+        return;
+    }
+
+    const config = vscode.workspace.getConfiguration('laravelModelsExplorer');
+
+    if (config.get('autoRefresh', true)) {
+
+        const composerJsonUri = vscode.Uri.joinPath(workspaceFolder.uri, 'composer.json');
+
+        const composerDocument = await vscode.workspace.openTextDocument(composerJsonUri);
+        const composerContent = composerDocument.getText();
+
+        const { autoload: { "psr-4": namespaces } }: ComposerJson = json_parser(composerContent) as ComposerJson;
+
+
+        Object.entries(namespaces).forEach(async ([namespace, path]: [string, string]) => {
+            const absolutePath = `${workspaceFolder.uri.fsPath}/${path}**/*.php`;
+
+            const watcher = vscode.workspace.createFileSystemWatcher(absolutePath);
+
+            const autoRefreshHandler = async () => {
+                await modelsProvider.refresh();
+            };
+
+            const autoRefreshHandlerWithAutoload = async () => {
+                await modelsProvider.refresh();
+            };
+
+            watcher.onDidCreate(autoRefreshHandlerWithAutoload);
+            watcher.onDidDelete(autoRefreshHandlerWithAutoload);
+            watcher.onDidChange(autoRefreshHandler);
+
+            context.subscriptions.push(watcher);
+        });
+
+    }
+
+    // Actualizar cuando cambia la configuración
+    vscode.workspace.onDidChangeConfiguration(async e => {
+        let needsRefresh = false;
         const config = vscode.workspace.getConfiguration('laravelModelsExplorer');
 
-        if (config.get('autoRefresh', true)) {
-
-            const composerJsonUri = vscode.Uri.joinPath(workspaceFolder.uri, 'composer.json');
-
-            const composerDocument = await vscode.workspace.openTextDocument(composerJsonUri);
-            const composerContent = composerDocument.getText();
-
-            const { autoload: { "psr-4": namespaces } }: ComposerJson = json_parser(composerContent) as ComposerJson;
-
-
-            Object.entries(namespaces).forEach(async ([namespace, path]: [string, string]) => {
-                const absolutePath = `${workspaceFolder.uri.fsPath}/${path}**/*.php`;
-
-                const watcher = vscode.workspace.createFileSystemWatcher(absolutePath);
-
-                const autoRefreshHandler = async () => {
-                    await modelsProvider.refresh();
-                };
-
-                const autoRefreshHandlerWithAutoload = async () => {
-                    await modelsProvider.refresh();
-                };
-
-                watcher.onDidCreate(autoRefreshHandlerWithAutoload);
-                watcher.onDidDelete(autoRefreshHandlerWithAutoload);
-                watcher.onDidChange(autoRefreshHandler);
-
-                context.subscriptions.push(watcher);
-            });
-
+        if (e.affectsConfiguration('laravelModelsExplorer.autoRefresh') && config.get('autoRefresh', true)) {
+            needsRefresh = true;
+        }
+        if (e.affectsConfiguration('laravelModelsExplorer.showProjectInfo')) {
+            needsRefresh = true;
+        }
+        if (e.affectsConfiguration('laravelModelsExplorer.expandByDefault')) {
+            needsRefresh = true;
+        }
+        if (e.affectsConfiguration('laravelModelsExplorer.enableTooltips')) {
+            needsRefresh = true;
         }
 
-        // Actualizar cuando cambia la configuración
-        vscode.workspace.onDidChangeConfiguration(async e => {
-            let needsRefresh = false;
-            const config = vscode.workspace.getConfiguration('laravelModelsExplorer');
-
-            if (e.affectsConfiguration('laravelModelsExplorer.autoRefresh') && config.get('autoRefresh', true)) {
-                needsRefresh = true;
-            }
-            if (e.affectsConfiguration('laravelModelsExplorer.showProjectInfo')) {
-                needsRefresh = true;
-            }
-            if (e.affectsConfiguration('laravelModelsExplorer.expandByDefault')) {
-                needsRefresh = true;
-            }
-            if (e.affectsConfiguration('laravelModelsExplorer.enableTooltips')) {
-                needsRefresh = true;
-            }
-
-            if (needsRefresh) {
-                await modelsProvider.refresh();
-            }
-        });
-
-        context.subscriptions.push(
-            treeView,
-            refreshCommand,
-            openModelCommand,
-            createModelCommand,
-        );
+        if (needsRefresh) {
+            await modelsProvider.refresh();
+        }
     });
+
+    context.subscriptions.push(
+        treeView,
+        refreshCommand,
+        openModelCommand,
+        createModelCommand,
+    );
 }
 
 async function createNewModel(modelName: string) {
