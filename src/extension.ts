@@ -38,7 +38,7 @@ function json_parser(json: string): any {
 
 export async function activate(context: vscode.ExtensionContext) {
     // Detectar si es un proyecto Laravel
-    const isLaravel = LaravelProjectDetector.isLaravelProject();
+    const isLaravel: boolean = await LaravelProjectDetector.isLaravelProject();
 
     if (!isLaravel) {
         return;
