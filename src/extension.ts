@@ -5,15 +5,45 @@ import ModelTemplate from './templates/model';
 
 let modelsProvider: LaravelModelsProvider;
 
+type ComposerJson = {
+    name: string;
+    description: string;
+    keywords: string[];
+    license: string;
+    type: string;
+
+    require: Record<string, string>;
+    "require-dev": Record<string, string>;
+
+    autoload: {
+        "psr-4": Record<string, string>;
+        classmap: string[];
+        files: string[];
+    };
+
+    "autoload-dev": {
+        "psr-4": Record<string, string>;
+    };
+};
+
+function json_parser(json: string): any {
+    try {
+        return JSON.parse(json);
+    } catch (error) {
+        console.error("Error parsing JSON:", error);
+        return null;
+    }
+};
+
 export function activate(context: vscode.ExtensionContext) {
     const detector = new LaravelProjectDetector();
 
     // Detectar si es un proyecto Laravel
-    detector.isLaravelProject().then(isLaravel => {
+    detector.isLaravelProject().then(async isLaravel => {
         if (!isLaravel) {
             return;
         }
-        
+
         vscode.commands.executeCommand('setContext', 'laravelProject', true);
 
         // Inicializar el proveedor de modelos
@@ -52,21 +82,48 @@ export function activate(context: vscode.ExtensionContext) {
 
             if (modelName) {
                 await createNewModel(modelName);
-                await modelsProvider.refresh();
             }
         });
 
-        // Auto-refresh cuando se modifican archivos
-        const watcher = vscode.workspace.createFileSystemWatcher('**/app/Models/**/*.php');
-        const autoRefreshHandler = async () => {
-            const config = vscode.workspace.getConfiguration('laravelModelsExplorer');
-            if (config.get('autoRefresh', true)) {
-                await modelsProvider.refresh();
-            }
-        };
-        watcher.onDidCreate(autoRefreshHandler);
-        watcher.onDidDelete(autoRefreshHandler);
-        watcher.onDidChange(autoRefreshHandler);
+        const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+
+        if (!workspaceFolder) {
+            return;
+        }
+
+        const config = vscode.workspace.getConfiguration('laravelModelsExplorer');
+
+        if (config.get('autoRefresh', true)) {
+
+            const composerJsonUri = vscode.Uri.joinPath(workspaceFolder.uri, 'composer.json');
+
+            const composerDocument = await vscode.workspace.openTextDocument(composerJsonUri);
+            const composerContent = composerDocument.getText();
+
+            const { autoload: { "psr-4": namespaces } }: ComposerJson = json_parser(composerContent) as ComposerJson;
+
+
+            Object.entries(namespaces).forEach(async ([namespace, path]: [string, string]) => {
+                const absolutePath = `${workspaceFolder.uri.fsPath}/${path}**/*.php`;
+
+                const watcher = vscode.workspace.createFileSystemWatcher(absolutePath);
+
+                const autoRefreshHandler = async () => {
+                    await modelsProvider.refresh();
+                };
+
+                const autoRefreshHandlerWithAutoload = async () => {
+                    await modelsProvider.refresh();
+                };
+
+                watcher.onDidCreate(autoRefreshHandlerWithAutoload);
+                watcher.onDidDelete(autoRefreshHandlerWithAutoload);
+                watcher.onDidChange(autoRefreshHandler);
+
+                context.subscriptions.push(watcher);
+            });
+
+        }
 
         // Actualizar cuando cambia la configuración
         vscode.workspace.onDidChangeConfiguration(async e => {
@@ -96,7 +153,6 @@ export function activate(context: vscode.ExtensionContext) {
             refreshCommand,
             openModelCommand,
             createModelCommand,
-            watcher
         );
     });
 }
